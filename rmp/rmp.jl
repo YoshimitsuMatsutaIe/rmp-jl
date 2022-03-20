@@ -40,7 +40,22 @@ end
 
 
 """ルートノード"""
-@with_kw mutable struct RootNode{T}
+@with_kw mutable struct Root{T}
+    children
+    q::Vector{T}
+    q_dot::Vector{T}
+    f::Vector{T}
+    M::Matrix{T}
+end
+
+
+"""ノード"""
+@with_kw mutable struct Node{T}
+    parent
+    children
+    J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
+    J_dot::Union{Matrix{T}, Nothing}
+    children
     x::Vector{T}
     x_dot::Vector{T}
     f::Vector{T}
@@ -49,18 +64,38 @@ end
 
 
 """リーフノード"""
-@with_kw mutable struct LeafNode{T}
+@with_kw mutable struct Leaf{T}
     parent::Int64
     J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
     J_dot::Union{Matrix{T}, Nothing}
+    children#::Union{Any, Nothing}
     x::Vector{T}
     x_dot::Vector{T}
+    rmp_param
     f::Vector{T}
     M::Matrix{T}
 end
 
 
+function pushforward(leaf::Leaf{T}) where T
+    leaf.x_dot = leaf.J()
 
+end
+
+
+function pushforward(root::Root{T}, q_ddot::Vector{T}, Δt::T) where {T}
+    root.q_dot = root.q_dot .+ Δt .* q_ddot
+    root.q = root.q .+ .+ Δt .* q_dot
+    for child in root.children
+        pushforward(child)
+    end
+end
+
+
+"""ソフトマックス関数"""
+function soft_max(s::T, α::T) where T
+    s + 1/α * log(1 + exp(-2 * α * s))
+end
 
 """fromGDSのアトラクターパラメータ"""
 @with_kw struct RMPfromGDSAttractor{T}
@@ -169,7 +204,7 @@ function w2(s, rw=1.0)
     if rw - s > 0.0
         return (rw - s)^2 / s
     else
-        return 0.0
+        return zero(s)
     end
     
 end
@@ -179,7 +214,7 @@ function dw2(s, rw)
     if rw - s > 0.0
         return (-2*(rw - s) * s + (rw - s)) / s^2
     else
-        return 0.0
+        return zero(s)
     end
 end
 
@@ -188,7 +223,7 @@ function u2(ds, σ)
     if ds < 0.0
         return 1 - exp(-ds^2 / (2*σ^2))
     else
-        return 0.0
+        return zero(ds)
     end
 end
 
@@ -197,7 +232,7 @@ function du2(ds, σ)
     if ds < 0.0
         return -exp(-ds^2 / (2*σ^2)) * (-ds / σ^2)
     else
-        return 0.0
+        return zero(ds)
     end
 end
 
