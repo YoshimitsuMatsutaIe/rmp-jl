@@ -1,10 +1,10 @@
 """RMP制御器"""
 
 
-"""
-RMPいろいろ
-"""
-module RMP
+# """
+# RMPいろいろ
+# """
+# module RMP
 
 
 
@@ -13,14 +13,14 @@ using ForwardDiff  # 自動微分パッケージ
 
 using Parameters
 
-export pullbacked_rmp
-export  get_natural
+# export pullbacked_rmp
+# export  natural
 
-export OriginalRMPAttractor
-export OriginalRMPCollisionAvoidance
-export OriginalJointLimitAvoidance
-export RMPfromGDSAttractor
-export RMPfromGDSCollisionAvoidance
+# export OriginalRMPAttractor
+# export OriginalRMPCollisionAvoidance
+# export OriginalJointLimitAvoidance
+# export RMPfromGDSAttractor
+# export RMPfromGDSCollisionAvoidance
 
 
 
@@ -39,6 +39,34 @@ function pullbacked_rmp(f, M, J)
 end
 
 
+"""リーフノード"""
+@with_kw mutable struct Leaf{T}
+    parent::Int64
+    ϕ::Vector{T}
+    J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
+    J_dot::Union{Matrix{T}, Nothing}
+    x::Vector{T}
+    x_dot::Vector{T}
+    rmp_param
+    f::Vector{T}
+    M::Matrix{T}
+end
+
+
+"""ノード"""
+@with_kw mutable struct Node{T}
+    parent
+    children::Vector{Leaf{T}}
+    ϕ::Vector{T}
+    J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
+    J_dot::Union{Matrix{T}, Nothing}
+    x::Vector{T}
+    x_dot::Vector{T}
+    f::Vector{T}
+    M::Matrix{T}
+end
+
+
 """ルートノード"""
 @with_kw mutable struct Root{T}
     children
@@ -49,48 +77,51 @@ end
 end
 
 
-"""ノード"""
-@with_kw mutable struct Node{T}
-    parent
-    children
-    J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
-    J_dot::Union{Matrix{T}, Nothing}
-    children
-    x::Vector{T}
-    x_dot::Vector{T}
-    f::Vector{T}
-    M::Matrix{T}
+"""push  
+root -> leaf
+"""
+function pushforward(leaf::Leaf{T}, q::Vector{T}, q_dot::Vector{T}) where T
+    leaf.x = leaf.ϕ(q)
+    leaf.x_dot = leaf.J(q) * q_dot
 end
 
 
-"""リーフノード"""
-@with_kw mutable struct Leaf{T}
-    parent::Int64
-    J::Matrix{T}  # parent -> childへのタスク写像のヤコビアン
-    J_dot::Union{Matrix{T}, Nothing}
-    children#::Union{Any, Nothing}
-    x::Vector{T}
-    x_dot::Vector{T}
-    rmp_param
-    f::Vector{T}
-    M::Matrix{T}
-end
-
-
-function pushforward(leaf::Leaf{T}) where T
-    leaf.x_dot = leaf.J()
-
-end
-
-
-function pushforward(root::Root{T}, q_ddot::Vector{T}, Δt::T) where {T}
-    root.q_dot = root.q_dot .+ Δt .* q_ddot
-    root.q = root.q .+ .+ Δt .* q_dot
-    for child in root.children
-        pushforward(child)
+"""push  
+node -> leaf
+"""
+function pushforward(node::Node{T}, q::Vector{T}, q_dot::Vector{T}) where T
+    node.x = node.ϕ(q)
+    node.x_dot = node.J(q) * q_dot
+    node.f = zero(node.f)
+    node.M = zero(node.M)
+    for child in node.children
+        pushforward(child, node.x, node.x_dot)
     end
 end
 
+
+"""push  
+root -> node
+"""
+function pushforward(root::Root{T}, q_ddot::Vector{T}, Δt::T) where {T}
+    root.q_dot = root.q_dot .+ Δt .* q_ddot
+    root.q = root.q .+ .+ Δt .* q_dot
+    root.f = zero(root.f)
+    root.M = zero(root.M)
+    for child in root.children
+        pushforward(child, root.q, root.q_dot)
+    end
+end
+
+
+function pullback(leaf::Leaf{T}) where {T}
+    leaf.f, leaf.M = natural(leaf.rmp_param, leaf.x, leaf.x_dot, leaf.x)
+    
+end
+
+
+
+### 以下RMP
 
 """ソフトマックス関数"""
 function soft_max(s::T, α::T) where T
@@ -169,7 +200,7 @@ function f(p::RMPfromGDSAttractor{T}, x, dx, x₀, M) where T
 end
 
 """fromGDSのアトラクタの自然形式RMPを取得"""
-function get_natural(p::RMPfromGDSAttractor{T}, x, dx, x₀) where T
+function natural(p::RMPfromGDSAttractor{T}, x, dx, x₀) where T
     M = inertia_matrix(x, p, x₀)
     return f(p, x, dx, x₀, M), M
 end
@@ -267,7 +298,7 @@ function inertia_matrix(p::RMPfromGDSCollisionAvoidance{T}, s, ds) where T
 end
 
 """fromGDSの障害物回避rmpの自然形式を取得"""
-function get_natural(p::RMPfromGDSCollisionAvoidance{T}, x, dx, x₀, dx₀=zero(x₀)) where T
+function natural(p::RMPfromGDSCollisionAvoidance{T}, x, dx, x₀, dx₀=zero(x₀)) where T
     
     s_vec = x .- x₀
     ds_vec = dx .- dx₀
@@ -390,7 +421,7 @@ end
 
 
 """fromGDSのジョイント制限回避RMP"""
-function get_natural(
+function natural(
     p::RMPfromGDSJointLimitAvoidance{T}, q::Vector{T}, dq::Vector{T},
     q_max::Vector{T}, q_min::Vector{T}, q_neutral::Vector{T}
     ) where T
@@ -403,4 +434,4 @@ end
 
 
 
-end
+#end
