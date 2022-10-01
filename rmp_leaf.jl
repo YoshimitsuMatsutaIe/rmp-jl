@@ -55,7 +55,7 @@ end
     rw::T
 end
 
-function (p::ObstacleAvoidnce)(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}) where {T}
+function (p::ObstacleAvoidnce{T})(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}) where {T}
     s = norm(x - p.o)
 
     if p.rw - s > 0
@@ -67,10 +67,9 @@ function (p::ObstacleAvoidnce)(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T},
         return
     end
 
-    J = -(x - p.o)' / s
-    s_dot = (J * (x_dot - o_dot))[1]
-    J_dot = -((x_dot).T - (x-o).T*(1/s*(x-p.o)' * (x_dot))) / s^2
-
+    J = -(x - p.o)' ./ s
+    s_dot = (J * (x_dot))[1]
+    J_dot = -(x_dot' - (x-p.o)' * (1/s * ((x-p.o)' * x_dot)[1])) ./ s^2
     if s_dot < 0
         u2 = 1 - exp(-s_dot^2 / (2*p.sigma^2))
         u2_dot = -exp(s_dot^2 / (2*p.sigma^2)) * (-s_dot/p.sigma^3)
@@ -88,6 +87,7 @@ function (p::ObstacleAvoidnce)(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T},
 
     out_M .= m .* J' * J
     out_f .= (f - m * (J_dot * x_dot)[1]) .* J'
+
 end
 
 
@@ -105,11 +105,10 @@ end
 
 
 function (p::JointLimitAvoidance)(q::Vector{T}, q_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}) where {T}
-    
     dim = length(q)
-    xi = zero(dim)
+    xi = zeros(T, dim)
 
-    for i in range(dim)
+    for i in 1:dim
         alpha_upper = 1 - exp(-max(q_dot[i], 0)^2 / (2*p.sigma^2))
         alpha_lower = 1 - exp(-min(q_dot[i], 0)^2 / (2*p.sigma^2))
         s = (q[i] - p.q_min[i]) / (p.q_max[i] - p.q_min[i])
@@ -122,9 +121,10 @@ function (p::JointLimitAvoidance)(q::Vector{T}, q_dot::Vector{T}, out_M::Matrix{
         a = b^(-2)
         a_dot = -2*b^(-3) * b_dot
         
-        xi[i] = 1/2 * a_dot * p.x_dot[i,0]^2
-        out_M[i,i] .= p.lamda * a
+
+        xi[i] = 1/2 * a_dot * q_dot[i]^2
+        out_M[i,i] = p.lambda * a
     end
 
-    out_f .= out_M * (p.gamma_p*(p.q_neutral - p.x) - p.gamma_d*p.x_dot) - xi
+    out_f .= out_M * (p.gamma_p*(p.q_neutral - q) - p.gamma_d*q_dot) - xi
 end

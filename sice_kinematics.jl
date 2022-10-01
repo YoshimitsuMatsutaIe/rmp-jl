@@ -20,17 +20,19 @@ const q_min = [(-3/4)π+(1/2)π, (-3/4)π, (-3/4)π, (-3/4)π]
 const q_max = [(3/4)π+(1/2)π, (3/4)π, (3/4)π, (3/4)π]
 const q_neutral = [(1/2)π, 0.0, 0.0, 0.0]
 
-
-struct Mapping{T}
+"""sice mapp"""
+struct Mapping
     n::Int64
 end
 
-function (p::Mapping)(q::Vector{T}, q_dot::Vector{T}) where T
-    x = phi(p.n, q)
-    J = J(n.n, q)
-    J_dot = J_dot(n.n, q, q_dot)
-    v = J * q_dot
-    x, v, J, J_dot
+function (p::Mapping)(
+    q::Vector{T}, q_dot::Vector{T},
+    out_x::Vector{T}, out_x_dot::Vector{T}, out_J::Matrix{T}, out_J_dot::Matrix{T}
+) where T
+    out_x .= phi(p.n, q)
+    out_J .= J(p.n, q)
+    out_J_dot .= J_dot(p.n, q, q_dot)
+    out_x_dot .= out_J * q_dot
 end
 
 
