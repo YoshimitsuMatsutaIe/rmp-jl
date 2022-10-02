@@ -1,0 +1,60 @@
+{
+    "//" : "siceのテスト",
+    "robot_name" : "sice",
+    "time_span" : 30.0,
+    "time_interval" : 0.01,
+    "rmp_param" : {
+        "goal_attractor" : {
+            "max_speed" : 5.0,
+            "gain" : 3.0,
+            "sigma_alpha" : 1.0,
+            "sigma_gamma" : 1.0,
+            "wu" : 10.0,
+            "wl" : 0.1,
+            "alpha" : 0.15,
+            "epsilon" : 0.5
+        },
+        "obstacle_avoidance" : {
+            "scale_rep" : 1.0,
+            "scale_damp" : 1.0,
+            "gain" : 5.0,
+            "sigma" : 1.0,
+            "rw" : 0.8
+        },
+        "joint_limit_avoidance" : {
+            "gamma_p" : 0.05,
+            "gamma_d" : 0.05,
+            "lam" : 1.0,
+            "sigma" : 0.1
+        }
+    },
+    "env_param" : {
+        "goal" : {
+            "type" : "static",
+            "param" : {
+                "x" : 0.5,
+                "y" : 2.5
+            }
+        },
+        "obstacle" : [
+            {
+                "type" : "sphere",
+                "param" : {
+                    "d" : 0.1,
+                    "r" : 0.6,
+                    "x" : 0.5,
+                    "y" : 1.0
+                }
+            },
+            {
+                "type" : "sphere",
+                "param" : {
+                    "d" : 0.1,
+                    "r" : 0.6,
+                    "x" : 3.0,
+                    "y" : 2.0
+                }
+            }
+        ]
+    }
+}

@@ -4,9 +4,9 @@ sice用のモジュール
 """
 module SiceKinematics
 
-export Mapping
-export q_min, q_max, q_neutral
-export  c_dim, t_dim
+# export Mapping
+# export q_min, q_max, q_neutral
+# export  c_dim, t_dim
 
 const c_dim = 4
 const t_dim = 2
@@ -20,9 +20,18 @@ const q_min = [(-3/4)π+(1/2)π, (-3/4)π, (-3/4)π, (-3/4)π]
 const q_max = [(3/4)π+(1/2)π, (3/4)π, (3/4)π, (3/4)π]
 const q_neutral = [(1/2)π, 0.0, 0.0, 0.0]
 
+const rs = [
+    [0., 0.],
+    [0., 0.],
+    [0., 0.],
+    [0., 0.]
+]
+
+
 """sice mapp"""
 struct Mapping
-    n::Int64
+    frame::Int64
+    index::Int64
 end
 
 function (p::Mapping)(

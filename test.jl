@@ -1,6 +1,7 @@
 include("rmp_node.jl")
 include("sice_kinematics.jl")
 include("mapping.jl")
+include("utils.jl")
 
 using .SiceKinematics
 
@@ -49,14 +50,15 @@ function main()
     end
 
     # obs avoidance
-    p = param["obstacle_avoidance"]
+    p = param["obstacle_avoidance"] |> keytosymbol
     obs_avo = ObstacleAvoidnce(
-        o = obs,
-        scale_rep = p["scale_rep"],
-        scale_damp = p["scale_damp"],
-        gain = p["gain"],
-        sigma = p["sigma"],
-        rw = p["rw"]
+        o = obs;
+        p...
+        # scale_rep = p["scale_rep"],
+        # scale_damp = p["scale_damp"],
+        # gain = p["gain"],
+        # sigma = p["sigma"],
+        # rw = p["rw"]
     )
 
 
@@ -121,7 +123,7 @@ function main()
 
 
 
-    # print_state(root)
+    print_state(root)
 
     # pushforward!(root, q_neutral, zero(q_neutral))
 
@@ -133,18 +135,18 @@ function main()
 
 
 
-    t_span = (0.0, 10.0)
-    X₀ = vcat(q_neutral, zero(q_neutral))
+    # t_span = (0.0, 10.0)
+    # X₀ = vcat(q_neutral, zero(q_neutral))
 
-    function dX(dX::Vector{T}, X::Vector{T}, root::Node{T}, t::T) where T
-        dX[1:c_dim] .= X[c_dim+1:end]
-        dX[c_dim+1:end] .= solve!(root, X[1:c_dim], X[c_dim+1:end])
-    end
+    # function dX(dX::Vector{T}, X::Vector{T}, root::Node{T}, t::T) where T
+    #     dX[1:c_dim] .= X[c_dim+1:end]
+    #     dX[c_dim+1:end] .= solve!(root, X[1:c_dim], X[c_dim+1:end])
+    # end
 
-    prob = ODEProblem(dX, X₀, t_span, root)
-    sol = solve(prob)
+    # prob = ODEProblem(dX, X₀, t_span, root)
+    # sol = solve(prob)
 
-    plot(sol, label="sol")
+    # plot(sol, label="sol")
 
 end
 
