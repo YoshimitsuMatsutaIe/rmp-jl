@@ -43,8 +43,48 @@ function make_tree(
     )
     add_child!(root, jl_node)
 
+    for (i, rs) in enumerate(rm.rss)
+        for (j, r) in enumerate(rs)
+            cp_map_ = rm.Mapping(i, j)
+            cp_node_ = Node(
+                t_dim,
+                c_dim,
+                cp_map_,
+                "cpoint" *string(i) * ", " * string(j)
+            )
+            
+            for (k, o) in enumerate(obs)
+                obs_avo = ObstacleAvoidnce(
+                    o, rmp_param["obstacle_avoidance"]...
+                )
+                obs_node_ = Node(
+                    t_dim,
+                    t_dim,
+                    id_map(),
+                    obs_avo,
+                    name = "obs_" * string(k) * "_at_" * string(i)*","*string(j)
+                )
+                add_child!(cp_node_, obs_node_)
+            end
 
-    
+            if (i, j) == rm.ee_id
+                goal_at = GoalAttractor(
+                    goal, rmp_param["goal_attractor"]...
+                )
+                goal_node = Node(
+                    t_dim,
+                    t_dim,
+                    id_map(),
+                    goal_at,
+                    name = "goal"
+                )
+                add_child!(cp_node_, goal_node)
+            end
+
+            add_child!(root, cp_node_)
+
+        end
+    end
 
 
     root

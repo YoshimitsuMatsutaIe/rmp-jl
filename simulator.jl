@@ -4,10 +4,10 @@ using JSON
 
 include("environment.jl")
 include("utils.jl")
-include("rmp_leaf.jl")
-include("rmp_node.jl")
+# include("rmp_leaf.jl")
+# include("rmp_node.jl")
 
-
+include("tree_constructor.jl")
 
 
 
