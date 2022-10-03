@@ -28,11 +28,14 @@ function make_tree(
 
     root = Node(c_dim)
 
+    
+
+    p = rmp_param["joint_limit_avoidance"] |> keytosymbol
     jl_avo = JointLimitAvoidance(
         q_neutral = rm.q_neutral,
         q_max = rm.q_max,
         q_min = rm.q_min;
-        rmp_param["joint_limit_avoidance"]...
+        p...
     )
     jl_node = Node(
         c_dim,
@@ -50,12 +53,13 @@ function make_tree(
                 t_dim,
                 c_dim,
                 cp_map_,
-                "cpoint" *string(i) * ", " * string(j)
+                name="cpoint" *string(i) * ", " * string(j)
             )
             
             for (k, o) in enumerate(obs)
+                p = rmp_param["obstacle_avoidance"] |> keytosymbol
                 obs_avo = ObstacleAvoidnce(
-                    o, rmp_param["obstacle_avoidance"]...
+                    o = o; p...
                 )
                 obs_node_ = Node(
                     t_dim,
@@ -68,8 +72,9 @@ function make_tree(
             end
 
             if (i, j) == rm.ee_id
+                p = rmp_param["goal_attractor"] |> keytosymbol
                 goal_at = GoalAttractor(
-                    goal, rmp_param["goal_attractor"]...
+                    g = goal; p...
                 )
                 goal_node = Node(
                     t_dim,
@@ -90,8 +95,3 @@ function make_tree(
     root
 end
 
-
-g = [1., 2.]
-obs = [[3., 4.]]
-
-make_tree(g, obs, Dict(), "sice")

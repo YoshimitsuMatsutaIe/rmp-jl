@@ -6,7 +6,7 @@ include("attractor_xi_2d.jl")
 
 
 """param of goal attractor"""
-@with_kw mutable struct GoalAttractor{T}
+@with_kw struct GoalAttractor{T}
     g::Vector{T}
     max_speed::T
     gain::T
@@ -46,7 +46,7 @@ end
 
 
 """param of obstacle avoidance"""
-@with_kw mutable struct ObstacleAvoidnce{T}
+@with_kw struct ObstacleAvoidnce{T}
     o::Vector{T}
     scale_rep::T
     scale_damp::T
@@ -99,7 +99,7 @@ end
     q_min::Vector{T}
     gamma_p::T
     gamma_d::T
-    lambda::T
+    lam::T
     sigma::T
 end
 
@@ -123,7 +123,7 @@ function (p::JointLimitAvoidance)(q::Vector{T}, q_dot::Vector{T}, out_M::Matrix{
         
 
         xi[i] = 1/2 * a_dot * q_dot[i]^2
-        out_M[i,i] = p.lambda * a
+        out_M[i,i] = p.lam * a
     end
 
     out_f .= out_M * (p.gamma_p*(p.q_neutral - q) - p.gamma_d*q_dot) - xi
