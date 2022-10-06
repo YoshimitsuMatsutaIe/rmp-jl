@@ -12,7 +12,7 @@ mutable struct Node{T}
     J::Union{Matrix{T}, Nothing}
     J_dot::Union{Matrix{T}, Nothing}
     mapping::Union{Any, Nothing}
-    rmp_functor::Union{Nothing, GoalAttractor{T}, ObstacleAvoidnce{T}, JointLimitAvoidance{T}}
+    rmp_functor::Union{Nothing, GoalAttractor{T}, ObstacleAvoidnce{T}, ObstacleAvoidnceMulti{T}, JointLimitAvoidance{T}}
     f::Vector{T}
     M::Matrix{T}
     parent::Union{Node{T}, Nothing}
@@ -27,7 +27,7 @@ function Node(
     mapping::Union{Any, Nothing};
     name::String="node"
 )
-    println("node")
+    #println("node")
     Node(
         name,
         dim,
@@ -49,10 +49,10 @@ end
 function Node(
     dim::Int64, parent_dim::Int64,
     mapping::Union{Any, Nothing},
-    rmp_functor::Union{GoalAttractor{T}, ObstacleAvoidnce{T}, JointLimitAvoidance{T}};
+    rmp_functor::Union{GoalAttractor{T}, ObstacleAvoidnce{T}, ObstacleAvoidnceMulti{T}, JointLimitAvoidance{T}};
     name::String="leaf"
     ) where T
-    println("leaf")
+    #println("leaf")
     Node(
         name,
         dim,
@@ -71,7 +71,7 @@ function Node(
 end
 
 function Node(dim::Int64)
-    println("root node")
+    #println("root node")
     Node(
         "root",
         dim,

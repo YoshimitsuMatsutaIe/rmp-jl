@@ -19,7 +19,9 @@ include("attractor_xi_2d.jl")
 end
 
 
-function (p::GoalAttractor)(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}) where {T}
+function (p::GoalAttractor)(
+    x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}
+) where {T}
 
     dim = length(x)
     z = x - p.g
@@ -45,23 +47,50 @@ function (p::GoalAttractor)(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, ou
 end
 
 
+
+function obstacle_avoidance_rmp_func(
+    s::T, ṡ::T, gain::T, σ::T, rw::T
+) where {T}
+    @assert rw - s > 0
+
+    w = (rw - s)^2 / s
+    ẇ = (-2*(rw-s)*s + (rw-s)) / s^2
+
+    if ṡ < 0
+        u = 1 - exp(-ṡ^2 / (2*σ^2))
+        u̇ = -exp(ṡ^2 / (2*σ^2)) * (-ṡ/σ^3)
+    else
+        u = 0
+        u̇ = 0
+    end
+
+    δ = u + 1/2 * ṡ * u̇
+    ξ = 1/2 * u * ẇ * ṡ^2
+    gradΦ = gain * w * ẇ
+    
+    m = w * δ
+    f = -gradΦ - ξ
+
+    return m, f
+end
+
+
+
 """param of obstacle avoidance"""
 @with_kw struct ObstacleAvoidnce{T}
     o::Vector{T}
-    scale_rep::T
-    scale_damp::T
     gain::T
     sigma::T
     rw::T
 end
 
-function (p::ObstacleAvoidnce{T})(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}) where {T}
+function (p::ObstacleAvoidnce{T})(
+    x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}
+) where {T}
+    #println("obs")
     s = norm(x - p.o)
 
-    if p.rw - s > 0
-        w2 = (p.rw - s)^2 / s
-        w2_dot = (-2*(p.rw-s)*s + (p.rw-s)) / s^2
-    else
+    if !(p.rw - s > 0)
         out_M .= zero(out_M)
         out_f .= zero(out_f)
         return
@@ -70,25 +99,58 @@ function (p::ObstacleAvoidnce{T})(x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{
     J = -(x - p.o)' ./ s
     s_dot = (J * (x_dot))[1]
     J_dot = -(x_dot' - (x-p.o)' * (1/s * ((x-p.o)' * x_dot)[1])) ./ s^2
-    if s_dot < 0
-        u2 = 1 - exp(-s_dot^2 / (2*p.sigma^2))
-        u2_dot = -exp(s_dot^2 / (2*p.sigma^2)) * (-s_dot/p.sigma^3)
-    else
-        u2 = 0
-        u2_dot = 0
-    end
-
-    delta = u2 + 1/2 * s_dot * u2_dot
-    xi = 1/2 * u2 * w2_dot * s_dot^2
-    grad_phi = p.gain * w2 * w2_dot
     
-    m = w2 * delta
-    f = -grad_phi - xi
+    m, f = obstacle_avoidance_rmp_func(s, s_dot, p.gain, p.sigma, p.rw)
 
     out_M .= m .* J' * J
     out_f .= (f - m * (J_dot * x_dot)[1]) .* J'
-
 end
+
+
+
+"""param of obstacle avoidance"""
+@with_kw struct ObstacleAvoidnceMulti{T}
+    os::Matrix{T}
+    gain::T
+    sigma::T
+    rw::T
+end
+
+function (p::ObstacleAvoidnceMulti{T})(
+    x::Vector{T}, x_dot::Vector{T}, out_M::Matrix{T}, out_f::Vector{T}
+) where {T}
+    #println("obs")
+    tmp_M = zero(out_M)
+    tmp_f = zero(out_f)
+    
+    for i in 1:size(p.os, 2)
+        o = p.os[:, i]
+        s = norm(x - o)
+
+        if p.rw - s <= 0
+            continue
+        end
+
+        J = -(x - o)' ./ s
+        s_dot = (J * (x_dot))[1]
+        J_dot = -(x_dot' - (x-o)' * (1/s * ((x-o)' * x_dot)[1])) ./ s^2
+        
+        m, f = obstacle_avoidance_rmp_func(s, s_dot, p.gain, p.sigma, p.rw)
+
+        tmp_M += m .* J' * J
+        tmp_f += (f - m * (J_dot * x_dot)[1]) .* J'
+    end
+
+    # @show s
+    # @show out_f
+    # @show out_M
+
+    # println("\n")
+    out_M .= tmp_M
+    out_f .= tmp_f
+end
+
+
 
 
 

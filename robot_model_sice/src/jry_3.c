@@ -1,0 +1,15 @@
+#include "jry_3.h"
+#include <math.h>
+
+void jry_3(double *q, double *out_4107292026161459257) {
+
+   out_4107292026161459257[0] = -sin(q[0])*sin(q[1])*sin(q[2])*sin(q[3]) + sin(q[0])*sin(q[1])*cos(q[2])*cos(q[3]) + sin(q[0])*sin(q[2])*cos(q[1])*cos(q[3]) + sin(q[0])*sin(q[3])*cos(q[1])*cos(q[2]) + sin(q[1])*sin(q[2])*cos(q[0])*cos(q[3]) + sin(q[1])*sin(q[3])*cos(q[0])*cos(q[2]) + sin(q[2])*sin(q[3])*cos(q[0])*cos(q[1]) - cos(q[0])*cos(q[1])*cos(q[2])*cos(q[3]);
+   out_4107292026161459257[1] = -sin(q[0])*sin(q[1])*sin(q[2])*sin(q[3]) + sin(q[0])*sin(q[1])*cos(q[2])*cos(q[3]) + sin(q[0])*sin(q[2])*cos(q[1])*cos(q[3]) + sin(q[0])*sin(q[3])*cos(q[1])*cos(q[2]) + sin(q[1])*sin(q[2])*cos(q[0])*cos(q[3]) + sin(q[1])*sin(q[3])*cos(q[0])*cos(q[2]) + sin(q[2])*sin(q[3])*cos(q[0])*cos(q[1]) - cos(q[0])*cos(q[1])*cos(q[2])*cos(q[3]);
+   out_4107292026161459257[2] = -sin(q[0])*sin(q[1])*sin(q[2])*sin(q[3]) + sin(q[0])*sin(q[1])*cos(q[2])*cos(q[3]) + sin(q[0])*sin(q[2])*cos(q[1])*cos(q[3]) + sin(q[0])*sin(q[3])*cos(q[1])*cos(q[2]) + sin(q[1])*sin(q[2])*cos(q[0])*cos(q[3]) + sin(q[1])*sin(q[3])*cos(q[0])*cos(q[2]) + sin(q[2])*sin(q[3])*cos(q[0])*cos(q[1]) - cos(q[0])*cos(q[1])*cos(q[2])*cos(q[3]);
+   out_4107292026161459257[3] = -sin(q[0])*sin(q[1])*sin(q[2])*sin(q[3]) + sin(q[0])*sin(q[1])*cos(q[2])*cos(q[3]) + sin(q[0])*sin(q[2])*cos(q[1])*cos(q[3]) + sin(q[0])*sin(q[3])*cos(q[1])*cos(q[2]) + sin(q[1])*sin(q[2])*cos(q[0])*cos(q[3]) + sin(q[1])*sin(q[3])*cos(q[0])*cos(q[2]) + sin(q[2])*sin(q[3])*cos(q[0])*cos(q[1]) - cos(q[0])*cos(q[1])*cos(q[2])*cos(q[3]);
+   out_4107292026161459257[4] = sin(q[0])*sin(q[1])*sin(q[2])*cos(q[3]) + sin(q[0])*sin(q[1])*sin(q[3])*cos(q[2]) + sin(q[0])*sin(q[2])*sin(q[3])*cos(q[1]) - sin(q[0])*cos(q[1])*cos(q[2])*cos(q[3]) + sin(q[1])*sin(q[2])*sin(q[3])*cos(q[0]) - sin(q[1])*cos(q[0])*cos(q[2])*cos(q[3]) - sin(q[2])*cos(q[0])*cos(q[1])*cos(q[3]) - sin(q[3])*cos(q[0])*cos(q[1])*cos(q[2]);
+   out_4107292026161459257[5] = sin(q[0])*sin(q[1])*sin(q[2])*cos(q[3]) + sin(q[0])*sin(q[1])*sin(q[3])*cos(q[2]) + sin(q[0])*sin(q[2])*sin(q[3])*cos(q[1]) - sin(q[0])*cos(q[1])*cos(q[2])*cos(q[3]) + sin(q[1])*sin(q[2])*sin(q[3])*cos(q[0]) - sin(q[1])*cos(q[0])*cos(q[2])*cos(q[3]) - sin(q[2])*cos(q[0])*cos(q[1])*cos(q[3]) - sin(q[3])*cos(q[0])*cos(q[1])*cos(q[2]);
+   out_4107292026161459257[6] = sin(q[0])*sin(q[1])*sin(q[2])*cos(q[3]) + sin(q[0])*sin(q[1])*sin(q[3])*cos(q[2]) + sin(q[0])*sin(q[2])*sin(q[3])*cos(q[1]) - sin(q[0])*cos(q[1])*cos(q[2])*cos(q[3]) + sin(q[1])*sin(q[2])*sin(q[3])*cos(q[0]) - sin(q[1])*cos(q[0])*cos(q[2])*cos(q[3]) - sin(q[2])*cos(q[0])*cos(q[1])*cos(q[3]) - sin(q[3])*cos(q[0])*cos(q[1])*cos(q[2]);
+   out_4107292026161459257[7] = sin(q[0])*sin(q[1])*sin(q[2])*cos(q[3]) + sin(q[0])*sin(q[1])*sin(q[3])*cos(q[2]) + sin(q[0])*sin(q[2])*sin(q[3])*cos(q[1]) - sin(q[0])*cos(q[1])*cos(q[2])*cos(q[3]) + sin(q[1])*sin(q[2])*sin(q[3])*cos(q[0]) - sin(q[1])*cos(q[0])*cos(q[2])*cos(q[3]) - sin(q[2])*cos(q[0])*cos(q[1])*cos(q[3]) - sin(q[3])*cos(q[0])*cos(q[1])*cos(q[2]);
+
+}

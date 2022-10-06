@@ -28,4 +28,6 @@ Manifest.toml
 *.jpg
 *.gif
 *.svg
-/build
+build/
+*.so
+*.csv
